@@ -45,7 +45,7 @@ const productSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    reviews: [revieSchema],
+    reviews: [reviewSchema],
     rating: {
       type: Number,
       required: true,

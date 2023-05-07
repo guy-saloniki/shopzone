@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import { bool } from 'prop-types';
 
 const orderSchema = new mongoose.Schema(
   {
