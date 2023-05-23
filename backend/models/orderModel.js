@@ -41,7 +41,7 @@ const orderSchema = new mongoose.Schema(
           type: String,
           required: true,
         },
-        conuntry: {
+        country: {
           type: String,
           required: true,
         },
@@ -102,6 +102,11 @@ const orderSchema = new mongoose.Schema(
     },
     deliveredAt: {
       type: Date,
+    },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: 'User',
     },
   },
   { timestamps: true }
