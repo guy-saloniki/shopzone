@@ -25,6 +25,10 @@ import PaymentPage from './pages/PaymentPage';
 import OrderPage from './pages/OrderPage';
 import FinalOrderPage from './pages/FinalOrderPage';
 import ProfilePage from './pages/ProfilePage';
+import OrderListPage from './pages/admin/OrderListPage';
+import AdminRoute from './components/AdminRoute';
+import ProductListPage from './pages/admin/ProductListPage';
+import ProductEditPage from './pages/admin/ProductEditPage';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -40,6 +44,12 @@ const router = createBrowserRouter(
         <Route path="/placeorder" element={<OrderPage />} />
         <Route path="/orders/:id" element={<FinalOrderPage />} />
         <Route path="/profile" element={<ProfilePage />} />
+      </Route>
+
+      <Route path="" element={<AdminRoute />}>
+        <Route path="/admin/orderlist" element={<OrderListPage />} />
+        <Route path="/admin/productList" element={<ProductListPage />} />
+        <Route path="/admin/product/:id/edit" element={<ProductEditPage />} />
       </Route>
     </Route>
   )
