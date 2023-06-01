@@ -109,28 +109,65 @@ const updateUserProfile = asyncHandler(async (req, res) => {
 // route - GET /api/users
 // Privat/Admin
 const getAllUsers = asyncHandler(async (req, res) => {
-  res.send('get all users');
+  const users = await User.find({});
+  res.status(200).json(users);
 });
 
 // Get single user
 // route - GET /api/users/:id
 // Privat/Admin
 const getSingleUser = asyncHandler(async (req, res) => {
-  res.send('get single user');
+  const user = await User.findById(req.params.id).select('-password');
+
+  if (!user) {
+    res.status(404);
+    throw new Error('User not found');
+  }
+
+  res.status(200).json(user);
 });
 
 // Update user
 // route - PUT /api/users/:id
 // Privat/Admin
 const updateUser = asyncHandler(async (req, res) => {
-  res.send('update user');
+  const { name, email } = req.body;
+  const user = await User.findById(req.params.id);
+
+  if (!user) {
+    res.status(404);
+    throw new Error('User not found');
+  }
+
+  user.name = req.body.name || user.name;
+  user.email = req.body.email || user.email;
+  user.isAdmin = Boolean(req.body.isAdmin);
+
+  const updatedUser = await user.save();
+  res.status(200).json({
+    _id: updatedUser._id,
+    name: updateUser.name,
+    email: updateUser.email,
+    isAdmin: updateUser.isAdmin,
+  });
 });
 
 // Delete user
 // route - DELETE /api/users/:id
 // Privat/Admin
 const deleteUser = asyncHandler(async (req, res) => {
-  res.send('delete user');
+  const user = await User.findById(req.params.id);
+  if (!user) {
+    res.status(404);
+    throw new Error('User not found');
+  }
+
+  if (user.isAdmin) {
+    res.status(400);
+    throw new Error('Can not delete admin user');
+  }
+  await user.deleteOne({ _id: req.params.id });
+  res.status(200).json({ message: 'User has been deleted' });
 });
 
 export {

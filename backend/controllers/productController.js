@@ -5,8 +5,19 @@ import Product from '../models/productModel.js';
 // route - GET /api/products
 // Public
 const getProducts = asyncHandler(async (req, res) => {
-  const products = await Product.find({});
-  res.status(200).json(products);
+  const pageSize = 8;
+  const page = Number(req.query.pageNumber || 1);
+
+  const keyword = req.query.keyword
+    ? { name: { $regex: req.query.keyword, $options: 'i' } }
+    : {};
+
+  const count = await Product.countDocuments({ ...keyword });
+
+  const products = await Product.find({ ...keyword })
+    .limit(pageSize)
+    .skip(pageSize * (page - 1));
+  res.status(200).json({ products, page, pages: Math.ceil(count / pageSize) });
 });
 
 // Get single product
@@ -65,4 +76,71 @@ const updateProduct = asyncHandler(async (req, res) => {
   throw new Error('Product not found');
 });
 
-export { getProductById, getProducts, createProduct, updateProduct };
+// Delete a product
+// route - DELETE /api/products/:id
+// Private/Admin
+const deleteProduct = asyncHandler(async (req, res) => {
+  const product = await Product.findById(req.params.id);
+  if (product) {
+    await Product.deleteOne({ _id: product._id });
+    res.status(200).json({ message: 'Product deleted' });
+  }
+  res.status(404);
+  throw new Error('Product not found');
+});
+
+// Review a product
+// route - POST /api/products/:id/reviews
+// Private
+const addProductReview = asyncHandler(async (req, res) => {
+  const { rating, comment } = req.body;
+  const product = await Product.findById(req.params.id);
+  if (product) {
+    const alreadyReviewd = await product.reviews.find(
+      (review) => review.user.toString() === req.user._id.toString()
+    );
+
+    if (alreadyReviewd) {
+      res.status(400);
+      throw new Error('Product already reviewd');
+    }
+
+    const review = {
+      name: req.user.name,
+      rating: Number(rating),
+      comment,
+      user: req.user._id,
+    };
+
+    product.reviews.push(review);
+
+    product.numReviews = product.reviews.length;
+
+    product.rating =
+      product.reviews.reduce((acc, review) => acc + review.rating, 0) /
+      product.reviews.length;
+
+    await product.save();
+    res.status(201).json({ message: 'Review added!' });
+  }
+  res.status(404);
+  throw new Error('Product not found');
+});
+
+// Get top rated products
+// route - Get /api/products/top
+// Public
+const getTopProducts = asyncHandler(async (req, res) => {
+  const products = await Product.find({}).sort({ rating: -1 }).limit(3);
+  res.status(200).json(products);
+});
+
+export {
+  getProductById,
+  getProducts,
+  createProduct,
+  updateProduct,
+  deleteProduct,
+  addProductReview,
+  getTopProducts,
+};

@@ -22,7 +22,7 @@ const OrderPage = () => {
     } else if (!cart.paymentMethod) {
       navigate('/payment');
     }
-  }, [cart.shippingAddress.address, cart.paymentMethod]);
+  }, [cart.shippingAddress.address, cart.paymentMethod, navigate]);
 
   const placeOrderHandler = async () => {
     try {
